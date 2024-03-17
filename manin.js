@@ -1,6 +1,5 @@
-
 let tasks = [];
-
+let editing = -1;
 
 function addTask(name, description) {
     let task = {
@@ -11,18 +10,24 @@ function addTask(name, description) {
     tasks.push(task);
 }
 
-
 function deleteTask(index) {
     tasks.splice(index, 1);
     showTasks();
 }
 
-
 function completeTask(index) {
-    tasks[index].completed = true;
-    showTasks();
+    if (editing !== index) {
+        tasks[index].completed = true;
+        showTasks();
+    }
 }
 
+function editTask(index, newName, newDescription) {
+    tasks[index].name = newName;
+    tasks[index].description = newDescription;
+    editing = -1;
+    showTasks();
+}
 
 function showTasks() {
     let taskList = document.getElementById('taskList');
@@ -33,24 +38,32 @@ function showTasks() {
         let listItem = document.createElement('li');
         listItem.textContent = task.name;
 
-
         if (task.completed) {
             listItem.classList.add('completed');
         }
 
-
         listItem.addEventListener('click', function () {
             completeTask(i);
         });
+
         listItem.addEventListener('contextmenu', function (event) {
             event.preventDefault();
             deleteTask(i);
         });
 
+        listItem.addEventListener('dblclick', function (event) {
+            event.preventDefault();
+            editing = i;
+            let newName = prompt("Nuevo nombre para la tarea:", task.name);
+            let newDescription = prompt("Nueva descripción para la tarea:", task.description);
+            if (newName !== null && newDescription !== null) {
+                editTask(i, newName, newDescription);
+            }
+        });
+
         taskList.appendChild(listItem);
     }
 }
-
 
 document.getElementById('taskForm').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -64,24 +77,18 @@ document.getElementById('taskForm').addEventListener('submit', function (event) 
     }
 });
 
-
 showTasks();
-
 
 function finishTaskList() {
     let confirmed = confirm("¿Deseas crear otra lista de tareas?");
     if (confirmed) {
-
-
         tasks = [];
         showTasks();
-
     } else {
         alert("Por hoy ya terminamos.");
-
     }
 }
 
-
 document.getElementById('finishBtn').addEventListener('click', finishTaskList);
+
 
